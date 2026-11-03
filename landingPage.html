@@ -8,39 +8,49 @@
   <!-- App Tab Icon -->
   <link rel="icon" type="image/png" href="ridewise-icon-192.png" />
 
-  <!-- Google Font -->
+  <!-- Google Fonts: body text + wordmark -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="landingPage.css" />
 </head>
 <body>
 
   <!-- Top Bar -->
-  <header class="topbar">
+  <header class="topbar" id="topbar">
+
     <!-- Left: Try RideWise Button -->
     <div class="topbar-left">
-      <a href="https://ride-wise.pages.dev" target="_blank" rel="noopener noreferrer" class="btn-try">
-        <span class="btn-sparkle">✦</span>
+      <a href="https://ride-wise.pages.dev" target="_blank" rel="noopener noreferrer" class="btn-try" aria-label="Try RideWise (opens the app)">
+        <!-- Navigation arrow icon (like the GPS puck in the app) -->
+        <svg class="btn-nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+        </svg>
         <span class="btn-text">Try RideWise</span>
-        <svg class="btn-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg class="btn-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <line x1="5" y1="12" x2="19" y2="12"></line>
           <polyline points="12 5 19 12 12 19"></polyline>
         </svg>
       </a>
     </div>
 
-    <!-- Center: App Name -->
+    <!-- Center: App Logo + Name -->
     <div class="topbar-center">
-      <span class="app-name">RIDEWISE</span>
+      <a href="#" class="brand" aria-label="RideWise home">
+        <img src="ridewise-icon-192.png" alt="" class="brand-logo" />
+        <span class="app-name">RIDEWISE</span>
+      </a>
     </div>
 
     <!-- Right: 3-Segmented Pill Switcher (System, Light, Dark) -->
     <div class="topbar-right">
-      <div class="theme-segment" role="radiogroup" aria-label="Theme switcher">
+      <div class="theme-segment" id="themeSegment" role="radiogroup" aria-label="Theme switcher">
+        <!-- Sliding highlight behind the active button -->
+        <span class="theme-thumb" aria-hidden="true"></span>
+
         <!-- 1. System -->
-        <button class="theme-btn" data-theme-choice="system" title="System preference" aria-label="System preference">
+        <button class="theme-btn" role="radio" data-theme-choice="system" title="System preference" aria-label="System preference">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
             <line x1="8" y1="21" x2="16" y2="21"></line>
@@ -49,7 +59,7 @@
         </button>
 
         <!-- 2. Light -->
-        <button class="theme-btn" data-theme-choice="light" title="Light theme" aria-label="Light theme">
+        <button class="theme-btn" role="radio" data-theme-choice="light" title="Light theme" aria-label="Light theme">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="5"></circle>
             <line x1="12" y1="1" x2="12" y2="3"></line>
@@ -64,7 +74,7 @@
         </button>
 
         <!-- 3. Dark -->
-        <button class="theme-btn" data-theme-choice="dark" title="Dark theme" aria-label="Dark theme">
+        <button class="theme-btn" role="radio" data-theme-choice="dark" title="Dark theme" aria-label="Dark theme">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
           </svg>

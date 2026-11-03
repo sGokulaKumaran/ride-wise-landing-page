@@ -1,9 +1,15 @@
 /**
- * RIDEWISE LANDING PAGE — 3-WAY THEME CONTROLLER (System | Light | Dark)
+ * RIDEWISE LANDING PAGE — SCRIPT
+ * 1. ThemeController : 3-way theme switch (System | Light | Dark)
+ * 2. TopbarController: slim-on-scroll + route progress line
  */
 
+/* ==========================================================================
+   1. THEME CONTROLLER
+   ========================================================================== */
 const ThemeController = {
   STORAGE_KEY: 'ridewise_theme_choice',
+  CHOICES: ['system', 'light', 'dark'],   // same order as the buttons
 
   init() {
     // 1. Get saved choice (system, light, or dark), default to 'system'
@@ -13,8 +19,7 @@ const ThemeController = {
     // 2. Add click listeners to the 3 buttons
     document.querySelectorAll('.theme-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const choice = btn.getAttribute('data-theme-choice');
-        this.setChoice(choice);
+        this.setChoice(btn.getAttribute('data-theme-choice'));
       });
     });
 
@@ -28,16 +33,19 @@ const ThemeController = {
   },
 
   setChoice(choice) {
+    if (!this.CHOICES.includes(choice)) choice = 'system';
     localStorage.setItem(this.STORAGE_KEY, choice);
 
-    // Update active highlight on the 3-button pill
+    // Update active state on the 3 buttons
     document.querySelectorAll('.theme-btn').forEach(btn => {
-      if (btn.getAttribute('data-theme-choice') === choice) {
-        btn.classList.add('active');
-      } else {
-        btn.classList.remove('active');
-      }
+      const isActive = btn.getAttribute('data-theme-choice') === choice;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-checked', isActive);
     });
+
+    // Slide the highlight thumb to the active button
+    const segment = document.getElementById('themeSegment');
+    if (segment) segment.style.setProperty('--i', this.CHOICES.indexOf(choice));
 
     // Apply the actual theme
     if (choice === 'system') {
@@ -53,7 +61,9 @@ const ThemeController = {
   }
 };
 
-
+/* ==========================================================================
+   START
+   ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
   ThemeController.init();
 });
