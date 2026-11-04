@@ -14,13 +14,16 @@
 
   --accent-cyan: #00F2FE;
   --accent-blue: #3B82F6;
+  --tyre-color: white;
 
-  /* Try Button */
-  --btn-try-bg: linear-gradient(135deg, rgba(0, 242, 254, 0.14) 0%, rgba(59, 130, 246, 0.22) 100%);
-  --btn-try-border: rgba(0, 242, 254, 0.4);
-  --btn-try-color: #FFFFFF;
-  --btn-try-glow: rgba(0, 242, 254, 0.3);
-  --btn-try-icon: #00F2FE;
+  /* Try Button - Simple & Refined */
+  --btn-try-bg: rgba(255, 255, 255, 0.04);
+  --btn-try-border: rgba(255, 255, 255, 0.12);
+  --btn-try-hover-bg: rgba(255, 255, 255, 0.08);
+  --btn-try-hover-border: rgba(255, 255, 255, 0.3);
+  --btn-try-color: #E2E8F0;
+  --btn-try-hover-color: #FFFFFF;
+  --btn-try-arrow: #FFFFFF;
 
   /* Pill Switch Colors */
   --pill-bg: #14171F;
@@ -42,13 +45,16 @@
 
   --accent-cyan: #0284C7;
   --accent-blue: #2563EB;
+  --tyre-color :  black;
 
-  /* Try Button */
-  --btn-try-bg: linear-gradient(135deg, #0284C7 0%, #2563EB 100%);
-  --btn-try-border: transparent;
-  --btn-try-color: #FFFFFF;
-  --btn-try-glow: rgba(37, 99, 235, 0.3);
-  --btn-try-icon: #BAE6FD;
+  /* Try Button - Simple & Refined */
+  --btn-try-bg: rgba(15, 23, 42, 0.04);
+  --btn-try-border: rgba(15, 23, 42, 0.12);
+  --btn-try-hover-bg: rgba(0, 0, 0, 0.06);
+  --btn-try-hover-border: rgba(15, 23, 42, 0.3);
+  --btn-try-color: #1E293B;
+  --btn-try-hover-color: #000000;
+  --btn-try-arrow: #000000;
 
   /* Pill Switch Colors */
   --pill-bg: #E4E4E7;
@@ -111,65 +117,62 @@ body {
 }
 
 .btn-try {
-  position: relative;
-  overflow: hidden;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 18px 9px 16px;
+  padding: 8px 16px;
   background: var(--btn-try-bg);
   border: 1px solid var(--btn-try-border);
   border-radius: 9999px;
 
   color: var(--btn-try-color);
-  font-size: 0.86rem;
-  font-weight: 700;
+  font-size: 0.85rem;
+  font-weight: 600;
   text-decoration: none;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   white-space: nowrap;
 
-  box-shadow: 0 4px 15px var(--btn-try-glow), inset 0 1px 1px rgba(255, 255, 255, 0.2);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Shimmer light sweep */
-.btn-try::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 60%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
-  transform: skewX(-20deg);
-  transition: left 0.6s ease;
+/* Tyre Icon */
+.btn-tyre {
+  color: var(--tyre-color);
+  opacity: 0.85;
+  transform-origin: center;
+  transition: opacity 0.2s ease;
 }
-
-.btn-try:hover::before { left: 150%; }
 
 .btn-try:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px var(--btn-try-glow), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  background: var(--btn-try-hover-bg);
+  border-color: var(--btn-try-hover-border);
+  color: var(--btn-try-hover-color);
+  transform: translateY(-1px);
 }
 
-.btn-try:active { transform: translateY(0) scale(0.97); }
+/* Continuous smooth spin ONLY while hovering, stops instantly on mouse leave */
+.btn-try:hover .btn-tyre {
+  opacity: 1;
+  animation: tyreSpin 0.7s linear infinite;
+}
+
+@keyframes tyreSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.btn-try:active {
+  transform: translateY(0px) scale(0.98);
+}
 
 .btn-try:focus-visible {
-  outline: 2px solid var(--accent-cyan);
-  outline-offset: 3px;
+  outline: 2px solid var(--btn-try-border);
+  outline-offset: 2px;
 }
-
-/* GPS navigation arrow — "turns" toward the destination on hover */
-.btn-nav-icon {
-  color: var(--btn-try-icon);
-  transform: rotate(0deg);
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.btn-try:hover .btn-nav-icon { transform: rotate(45deg); }
-
-.btn-arrow { transition: transform 0.25s ease; }
-.btn-try:hover .btn-arrow { transform: translateX(4px); }
 
 /* ---------- Center: Logo + App Name ---------- */
 .topbar-center {
