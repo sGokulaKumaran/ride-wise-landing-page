@@ -32,6 +32,17 @@
   --pill-icon-hover: #D4D4D8;
   --pill-active-bg: #27272A;
   --pill-active-color: #FFFFFF;
+
+  /* Zipper Launch Transition */
+  --zip-portal-bg: #111419;
+  --zip-portal-glow: rgba(255, 255, 255, 0.06);
+  --zip-portal-text: #FFFFFF;
+  --zip-portal-muted: #94A3B8;
+  --zip-teeth: rgba(255, 255, 255, 0.9);
+  --zip-shadow: rgba(0, 0, 0, 0.75);
+  --zip-tyre-color: #FFFFFF;
+  --zip-track-fill: rgba(255, 255, 255, 0.12);
+  --zip-progress-fill: #FFFFFF;
 }
 
 /* 2. LIGHT THEME — day ride */
@@ -63,6 +74,17 @@
   --pill-icon-hover: #18181B;
   --pill-active-bg: #FFFFFF;
   --pill-active-color: #0F172A;
+
+  /* Zipper Launch Transition */
+  --zip-portal-bg: #E9ECF0;
+  --zip-portal-glow: rgba(255, 255, 255, 0.8);
+  --zip-portal-text: #0F172A;
+  --zip-portal-muted: #64748B;
+  --zip-teeth: rgba(15, 23, 42, 0.85);
+  --zip-shadow: rgba(15, 23, 42, 0.35);
+  --zip-tyre-color: #000000;
+  --zip-track-fill: rgba(15, 23, 42, 0.1);
+  --zip-progress-fill: #0F172A;
 }
 
 /* Base Reset */
@@ -132,7 +154,12 @@ body {
   letter-spacing: 0.01em;
   white-space: nowrap;
 
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+/* Ensure child elements never interfere with hover */
+.btn-try * {
+  pointer-events: none;
 }
 
 /* Tyre Wrapper with Speed Lines */
@@ -153,9 +180,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 3px;
-  pointer-events: none;
   opacity: 0;
-  transition: opacity 0.25s ease;
+  transition: opacity 0.2s ease;
 }
 
 .speed-line {
@@ -178,15 +204,16 @@ body {
 .btn-tyre {
   color: var(--tyre-color);
   opacity: 0.85;
-  transform-origin: center;
-  transition: opacity 0.2s ease, transform 0.25s ease;
+  display: block;
+  transform-origin: 50% 50%;
+  transition: opacity 0.2s ease;
+  will-change: transform;
 }
 
 .btn-try:hover {
   background: var(--btn-try-hover-bg);
   border-color: var(--btn-try-hover-border);
   color: var(--btn-try-hover-color);
-  transform: translateY(-1px);
 }
 
 /* Show speed lines and stream them backward on hover */
@@ -213,17 +240,17 @@ body {
   }
 }
 
-/* Tyre moves slightly forward and spins continuously */
+/* Continuous, seamless 360 spin without any stutter or restart */
 .btn-try:hover .btn-tyre {
   opacity: 1;
   animation: tyreRoll 0.6s linear infinite;
 }
 
 @keyframes tyreRoll {
-  from {
+  0% {
     transform: rotate(0deg);
   }
-  to {
+  100% {
     transform: rotate(360deg);
   }
 }
@@ -232,10 +259,10 @@ body {
   transform: translateY(0px) scale(0.98);
 }
 
-.btn-try:focus-visible {
+/* .btn-try:focus-visible {
   outline: 2px solid var(--btn-try-border);
   outline-offset: 2px;
-}
+} */
 
 /* ---------- Center: Logo + App Name ---------- */
 .topbar-center {
@@ -357,3 +384,168 @@ body {
     animation-duration: 0.01ms !important;
   }
 }
+
+
+/* ==========================================================================
+   ZIPPER LAUNCH TRANSITION
+   The zipper line is the bottom edge of the top bar.
+   The tyre is the slider: it drops onto the line, rolls left → right,
+   and the teeth separate behind it into a real "eye" shaped opening.
+   All shapes are drawn per-frame by JS (landingPage.js).
+   ========================================================================== */
+
+.zip-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.zip-overlay.active {
+  visibility: visible;
+  pointer-events: auto;          /* block clicks while launching */
+}
+
+/* What is revealed inside the opening */
+.zip-portal {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 50% 45%, var(--zip-portal-glow) 0%, transparent 55%),
+    var(--zip-portal-bg);
+  color: var(--zip-portal-text);
+  clip-path: polygon(0 0, 0 0, 0 0);   /* closed until JS opens it */
+  will-change: clip-path;
+}
+
+.zip-portal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 32px;
+  text-align: center;
+  user-select: none;
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.zip-portal.revealed .zip-portal-content {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.zip-portal-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.zip-portal-logo {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+}
+
+.zip-portal-name {
+  font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  margin-right: -0.28em;
+  color: var(--zip-portal-text);
+}
+
+.zip-portal-tagline {
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: var(--zip-portal-muted);
+}
+
+.zip-portal-track {
+  width: 180px;
+  height: 2px;
+  margin-top: 6px;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: var(--zip-track-fill);
+}
+
+.zip-portal-progress {
+  width: 100%;
+  height: 100%;
+  background: var(--zip-progress-fill);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.zip-portal.revealed .zip-portal-progress {
+  animation: zipProgress 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  /* this Will actual move the progress bar */
+}
+
+@keyframes zipProgress {
+  to { transform: scaleX(1); }
+}
+
+/* SVG layer: teeth + fabric edge shadows */
+.zip-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Zipper teeth: short thick dashes = individual teeth */
+.zip-teeth {
+  fill: none;
+  stroke: var(--zip-teeth);
+  stroke-width: 4;
+  stroke-dasharray: 2.5 3.5;
+  stroke-linecap: butt;
+}
+
+/* Second closed row is shifted half a tooth → teeth interlock */
+.zip-teeth.offset {
+  stroke-dashoffset: 3;
+}
+
+/* Fabric tape under the teeth */
+.zip-tape {
+  fill: none;
+  stroke: var(--zip-teeth);
+  stroke-width: 1;
+  opacity: 0.35;
+}
+
+/* Soft shadow the fabric edges cast into the opening (depth) */
+.zip-shadow {
+  fill: none;
+  stroke: var(--zip-shadow);
+  stroke-width: 14;
+  filter: url(#zipBlur);
+}
+
+/* The slider (tyre). Position + rotation set by JS every frame */
+.zip-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 22px;
+  height: 22px;
+  color: var(--zip-tyre-color);
+  will-change: transform;
+}
+
+.zip-slider svg {
+  display: block;
+}
+
+
