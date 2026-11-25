@@ -1569,6 +1569,82 @@ html {
   gap: 12px;
 }
 
+/* Chapter 06: Contact Grid */
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.contact-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background: var(--surface-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  text-decoration: none;
+  color: var(--text-main);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.contact-card:hover {
+  border-color: var(--btn-try-hover-border);
+  transform: translateY(-2px);
+}
+
+.contact-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.contact-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--accent-cyan);
+}
+
+.contact-arrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.contact-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  color: var(--text-main);
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.contact-card .copy-code-btn {
+  background: var(--btn-try-bg);
+  border-color: var(--btn-try-border);
+  color: var(--text-muted);
+}
+
+.contact-card .copy-code-btn:hover {
+  color: var(--text-main);
+  border-color: var(--btn-try-hover-border);
+}
+
+.contact-card .copy-code-btn.copied {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
 .gis-footer {
   margin-top: 36px;
   padding-top: 20px;
@@ -1656,7 +1732,8 @@ html {
   }
 
   .bento-grid,
-  .specs-grid {
+  .specs-grid,
+  .contact-grid {
     grid-template-columns: 1fr;
   }
 }

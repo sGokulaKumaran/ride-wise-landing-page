@@ -88,6 +88,7 @@
       this.initHotspots();
       this.initLightbox();
       this.initQuickstartCopy();
+      this.initEmailCopy();
     },
 
     /* ---------- 1. GIS Telemetry Ribbon & Reading Progress ---------- */
@@ -358,6 +359,26 @@
           }, 2000);
         } catch {
           btn.textContent = 'Select & copy';
+        }
+      });
+    },
+
+    /* ---------- 7. Copy Contact Email ---------- */
+    initEmailCopy() {
+      const btn = document.getElementById('btnCopyEmail');
+      if (!btn) return;
+
+      btn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText('gokulakumaran2007@gmail.com');
+          btn.textContent = 'Copied ✓';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        } catch {
+          btn.textContent = 'Copy failed';
         }
       });
     }
