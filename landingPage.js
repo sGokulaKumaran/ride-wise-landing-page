@@ -80,13 +80,16 @@ const LaunchTransitionController = {
 
   init() {
     this.btn = document.getElementById('btnTryRideWise');
-    if (!this.btn) return;
+    const triggers = document.querySelectorAll('#btnTryRideWise, .js-zip-launch');
+    if (!triggers.length) return;
 
-    this.btn.addEventListener('click', (e) => {
-      // Let Ctrl/Cmd/Shift/middle-click open a new tab as normal
-      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
-      e.preventDefault();
-      this.launch();
+    triggers.forEach((el) => {
+      el.addEventListener('click', (e) => {
+        // Let Ctrl/Cmd/Shift/middle-click open a new tab as normal
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+        e.preventDefault();
+        this.launch(el);
+      });
     });
 
     // If the user comes back with the browser Back button, reset the page
@@ -191,7 +194,7 @@ const LaunchTransitionController = {
   },
 
   /* ---------- Main sequence ---------- */
-  async launch() {
+  async launch(triggerEl) {
     if (this.isLaunching) return;
     this.isLaunching = true;
 
@@ -220,10 +223,12 @@ const LaunchTransitionController = {
     }
 
     // Safety net: always navigate even if the tab gets throttled
-    this.safety = setTimeout(() => { window.location.href = this.TARGET_URL; }, 4000);
+    this.safety = setTimeout(() => { window.location.href = this.TARGET_URL; }, 7000);
 
     // Geometry
-    const tyreRect = (this.el.btnTyre || this.btn).getBoundingClientRect();
+    const activeBtn = triggerEl || this.btn;
+    const isTopbarBtn = !activeBtn || activeBtn === this.btn;
+    const tyreRect = (isTopbarBtn && this.el.btnTyre ? this.el.btnTyre : activeBtn).getBoundingClientRect();
     const startX = tyreRect.left + tyreRect.width / 2;
     const startY = tyreRect.top + tyreRect.height / 2;
     this.geo = {
@@ -237,30 +242,30 @@ const LaunchTransitionController = {
     const r = this.TYRE_RADIUS;
 
     // Show overlay, hide the button's own tyre (the slider replaces it)
-    if (this.el.btnTyre) this.el.btnTyre.style.visibility = 'hidden';
+    if (isTopbarBtn && this.el.btnTyre) this.el.btnTyre.style.visibility = 'hidden';
     this.el.overlay.classList.add('active');
     this.render(startX, 0);
     this.setSlider(startX, startY, 0, 0.68);
 
     // 1. DROP onto the zipper line
-    await this.tween(280, this.ease.outBack, (p) => {
+    await this.tween(420, this.ease.outBack, (p) => {
       this.setSlider(startX, startY + (y0 - startY) * p, 0, 0.68 + 0.32 * Math.min(p, 1));
     });
 
     // 2. UNZIP: roll left → right (rotation = distance / radius → true rolling)
-    await this.tween(950, this.ease.inOutCubic, (p) => {
+    await this.tween(1850, this.ease.inOutCubic, (p) => {
       const sx = startX + (endX - startX) * p;
       this.render(sx, 0);
       this.setSlider(sx, y0, (sx - startX) / r);
     });
 
     // 3. RELEASE: both halves fall open
-    await this.tween(380, this.ease.outCubic, (p) => this.render(endX, p));
+    await this.tween(550, this.ease.outCubic, (p) => this.render(endX, p));
     this.el.portal.style.clipPath = 'none';
 
     // 4. LAUNCH: portal content appears, then open the app
     this.el.portal.classList.add('revealed');
-    await this.wait(600);
+    await this.wait(700);
     clearTimeout(this.safety);
     window.location.href = this.TARGET_URL;
   },
@@ -279,9 +284,229 @@ const LaunchTransitionController = {
 };
 
 /* ==========================================================================
+   3. DIAGONAL ROAD + BIKE LAUNCH TRANSITION (Bottom CTA)
+   Sequence:
+     1. LAY ROAD     : diagonal highway (0, H) -> (W, 0) appears ahead.
+     2. RIDE & SPLIT : bike climbs diagonally while splitting the road open.
+     3. PEEL OPEN    : both diagonal halves fall away to reveal the portal.
+     4. LAUNCH       : RideWise portal content animates, then opens the app.
+   ========================================================================== */
+const RoadLaunchController = {
+  TARGET_URL: 'https://ride-wise.pages.dev',
+  SAMPLES: 44,
+  WHEEL_RADIUS: 12,
+  isLaunching: false,
+
+  init() {
+    const triggers = document.querySelectorAll('.js-road-launch');
+    if (!triggers.length) return;
+
+    triggers.forEach((el) => {
+      el.addEventListener('click', (e) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+        e.preventDefault();
+        this.launch();
+      });
+    });
+
+    window.addEventListener('pageshow', (e) => {
+      if (e.persisted) this.reset();
+    });
+  },
+
+  tween(duration, ease, onUpdate) {
+    return LaunchTransitionController.tween(duration, ease, onUpdate);
+  },
+
+  wait(ms) {
+    return LaunchTransitionController.wait(ms);
+  },
+
+  setBike(s, wheelDeg, p = 0) {
+    const { H, ux, uy, angleDeg } = this.geo;
+    const bx = s * ux;
+    const by = H + s * uy;
+    // Subtle launch wheelie at take-off + gentle suspension bounce
+    const wheelie = p < 0.28 ? -7 * Math.sin((p / 0.28) * Math.PI) : 0;
+    const bob = Math.sin(p * 34) * 1.6;
+    // Anchor tyre contact line (y = 66 in 120x72 viewBox) onto the diagonal centerline
+    this.el.bike.style.transform =
+      `translate(${(bx - 60).toFixed(1)}px, ${(by - 66 + bob).toFixed(1)}px) rotate(${(angleDeg + wheelie).toFixed(2)}deg)`;
+    if (this.el.wheelRear) {
+      this.el.wheelRear.setAttribute('transform', `translate(30 56) rotate(${wheelDeg.toFixed(1)})`);
+    }
+    if (this.el.wheelFront) {
+      this.el.wheelFront.setAttribute('transform', `translate(88 56) rotate(${wheelDeg.toFixed(1)})`);
+    }
+  },
+
+  toPoints(pts) {
+    return pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+  },
+
+  render(s, release = 0) {
+    const { H, D, ux, uy, nx, ny } = this.geo;
+    const L = Math.max(s, 1);
+    const toS = Math.min(Math.max(s, 0), D);
+
+    const topPts = [];
+    const bottomPts = [];
+    const shadowTop = [];
+    const shadowBottom = [];
+
+    for (let i = 0; i <= this.SAMPLES; i++) {
+      const d = toS * (i / this.SAMPLES);
+      const cx = d * ux;
+      const cy = H + d * uy;
+
+      const a = Math.max(d, 0);
+      const b = Math.max(s - d, 0);
+      const eye = ((a * b) / L) * 0.65;
+      const open = eye + (D * 1.15 - eye) * release;
+
+      topPts.push([cx + nx * open, cy + ny * open]);
+      bottomPts.push([cx - nx * open, cy - ny * open]);
+      shadowTop.push([cx + nx * (open - 6), cy + ny * (open - 6)]);
+      shadowBottom.push([cx - nx * (open - 6), cy - ny * (open - 6)]);
+    }
+
+    const poly = [...topPts, ...bottomPts.slice().reverse()]
+      .map(([x, y]) => `${x.toFixed(1)}px ${y.toFixed(1)}px`)
+      .join(',');
+    this.el.portal.style.clipPath = `polygon(${poly})`;
+
+    this.el.edgeTop.setAttribute('points', this.toPoints(topPts));
+    this.el.edgeBottom.setAttribute('points', this.toPoints(bottomPts));
+    this.el.shadowTop.setAttribute('points', this.toPoints(shadowTop));
+    this.el.shadowBottom.setAttribute('points', this.toPoints(shadowBottom));
+
+    // Ahead diagonal highway from bike position to top-right (W, 0)
+    const aheadStart = Math.max(0, Math.min(s, D));
+    const ax1 = aheadStart * ux;
+    const ay1 = H + aheadStart * uy;
+    const ax2 = D * ux;
+    const ay2 = H + D * uy;
+
+    [this.el.aheadAsphalt, this.el.aheadDash].forEach((line) => {
+      if (!line) return;
+      line.setAttribute('x1', ax1.toFixed(1));
+      line.setAttribute('y1', ay1.toFixed(1));
+      line.setAttribute('x2', ax2.toFixed(1));
+      line.setAttribute('y2', ay2.toFixed(1));
+      line.style.opacity = release > 0 ? String(1 - release) : '1';
+    });
+
+    const setShoulder = (el, sign) => {
+      if (!el) return;
+      const ox = nx * 18 * sign;
+      const oy = ny * 18 * sign;
+      el.setAttribute('x1', (ax1 + ox).toFixed(1));
+      el.setAttribute('y1', (ay1 + oy).toFixed(1));
+      el.setAttribute('x2', (ax2 + ox).toFixed(1));
+      el.setAttribute('y2', (ay2 + oy).toFixed(1));
+      el.style.opacity = release > 0 ? String(1 - release) : '0.65';
+    };
+    setShoulder(this.el.aheadShoulderA, 1);
+    setShoulder(this.el.aheadShoulderB, -1);
+
+    this.el.svg.style.opacity = String(1 - release);
+  },
+
+  async launch() {
+    if (this.isLaunching) return;
+    this.isLaunching = true;
+
+    const $ = (id) => document.getElementById(id);
+    this.el = {
+      overlay: $('roadOverlay'),
+      portal: $('roadPortal'),
+      svg: $('roadSvg'),
+      bike: $('roadBike'),
+      wheelRear: $('bikeWheelRear'),
+      wheelFront: $('bikeWheelFront'),
+      edgeTop: $('roadEdgeTop'),
+      edgeBottom: $('roadEdgeBottom'),
+      shadowTop: $('roadShadowTop'),
+      shadowBottom: $('roadShadowBottom'),
+      aheadAsphalt: $('roadAheadAsphalt'),
+      aheadShoulderA: $('roadAheadShoulderA'),
+      aheadShoulderB: $('roadAheadShoulderB'),
+      aheadDash: $('roadAheadDash')
+    };
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion || !this.el.overlay) {
+      window.location.href = this.TARGET_URL;
+      return;
+    }
+
+    this.safety = setTimeout(() => { window.location.href = this.TARGET_URL; }, 7000);
+
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    const D = Math.hypot(W, H);
+    const ux = W / D;
+    const uy = -H / D;
+    this.geo = {
+      W,
+      H,
+      D,
+      ux,
+      uy,
+      nx: -uy,
+      ny: ux,
+      angleDeg: (Math.atan2(-H, W) * 180) / Math.PI
+    };
+
+    this.el.overlay.classList.add('active');
+    this.el.svg.style.opacity = '0';
+    this.render(0, 0);
+    this.setBike(-75, 0, 0);
+
+    // 1. LAY ROAD
+    await this.tween(450, LaunchTransitionController.ease.outCubic, (p) => {
+      this.el.svg.style.opacity = p.toFixed(3);
+    });
+
+    // 2. RIDE & SPLIT diagonally from bottom-left to top-right (2.1s)
+    const startS = -65;
+    const endS = D + 110;
+    await this.tween(2100, LaunchTransitionController.ease.inOutCubic, (p) => {
+      const s = startS + (endS - startS) * p;
+      const wheelDeg = ((s - startS) / this.WHEEL_RADIUS) * (180 / Math.PI);
+      this.render(s, 0);
+      this.setBike(s, wheelDeg, p);
+    });
+
+    // 3. PEEL OPEN
+    await this.tween(550, LaunchTransitionController.ease.outCubic, (p) => {
+      this.render(endS, p);
+    });
+    this.el.portal.style.clipPath = 'none';
+
+    // 4. LAUNCH
+    this.el.portal.classList.add('revealed');
+    await this.wait(700);
+    clearTimeout(this.safety);
+    window.location.href = this.TARGET_URL;
+  },
+
+  reset() {
+    this.isLaunching = false;
+    clearTimeout(this.safety);
+    if (!this.el) return;
+    this.el.overlay.classList.remove('active');
+    this.el.portal.classList.remove('revealed');
+    this.el.portal.style.clipPath = '';
+    this.el.svg.style.opacity = '';
+  }
+};
+
+/* ==========================================================================
    START
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
   ThemeController.init();
   LaunchTransitionController.init();
+  RoadLaunchController.init();
 });

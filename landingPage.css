@@ -47,7 +47,23 @@
   /* Cartographic Background */
   --bg-grain-opacity: 0.018;
   --bg-corridor-rgb: 7, 9, 14;
-  --bg-corridor-core: 0.86;
+  --bg-corridor-core: 0.72;
+
+  /* Editorial Blog Surfaces */
+  --surface-card: rgba(15, 19, 29, 0.78);
+  --surface-elevated: rgba(22, 28, 42, 0.88);
+  --surface-glass: rgba(10, 14, 22, 0.72);
+  --code-bg: #0b0f18;
+  --badge-bg: rgba(0, 242, 254, 0.08);
+  --badge-border: rgba(0, 242, 254, 0.25);
+  --accent-soft: rgba(0, 242, 254, 0.14);
+
+  /* Diagonal Road + Bike Launch Transition */
+  --road-asphalt: rgba(24, 30, 44, 0.92);
+  --road-dash: rgba(0, 242, 254, 0.85);
+  --road-edge: rgba(226, 232, 240, 0.78);
+  --road-bike-color: #FFFFFF;
+  --road-headlight: rgba(0, 242, 254, 0.28);
 }
 
 /* 2. LIGHT THEME — day ride */
@@ -94,7 +110,23 @@
   /* Cartographic Background */
   --bg-grain-opacity: 0.014;
   --bg-corridor-rgb: 248, 250, 252;
-  --bg-corridor-core: 0.88;
+  --bg-corridor-core: 0.74;
+
+  /* Editorial Blog Surfaces */
+  --surface-card: rgba(255, 255, 255, 0.86);
+  --surface-elevated: rgba(255, 255, 255, 0.96);
+  --surface-glass: rgba(248, 250, 252, 0.84);
+  --code-bg: #0f172a;
+  --badge-bg: rgba(2, 132, 199, 0.08);
+  --badge-border: rgba(2, 132, 199, 0.25);
+  --accent-soft: rgba(2, 132, 199, 0.12);
+
+  /* Diagonal Road + Bike Launch Transition */
+  --road-asphalt: rgba(30, 41, 59, 0.88);
+  --road-dash: rgba(248, 250, 252, 0.9);
+  --road-edge: rgba(15, 23, 42, 0.82);
+  --road-bike-color: #0F172A;
+  --road-headlight: rgba(2, 132, 199, 0.24);
 }
 
 /* Base Reset */
@@ -296,11 +328,11 @@ body {
 }
 
 .btn-try:hover .speed-line.line-1 {
-  animation: streamLine 0.4s ease-in-out infinite alternate;
+  animation: streamLine 0.65s ease-in-out infinite alternate;
 }
 
 .btn-try:hover .speed-line.line-2 {
-  animation: streamLine 0.4s ease-in-out infinite 0.15s alternate;
+  animation: streamLine 0.65s ease-in-out infinite 0.22s alternate;
 }
 
 @keyframes streamLine {
@@ -317,7 +349,7 @@ body {
 /* Continuous, seamless 360 spin without any stutter or restart */
 .btn-try:hover .btn-tyre {
   opacity: 1;
-  animation: tyreRoll 0.6s linear infinite;
+  animation: tyreRoll 1.1s linear infinite;
 }
 
 @keyframes tyreRoll {
@@ -620,6 +652,1051 @@ body {
 
 .zip-slider svg {
   display: block;
+}
+
+/* ==========================================================================
+   DIAGONAL ROAD + BIKE LAUNCH TRANSITION
+   Bottom-left -> top-right highway slash; the bike climbs the diagonal road
+   and splits the page diagonally open behind it into the RideWise portal.
+   ========================================================================== */
+
+.road-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.road-overlay.active {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.road-portal {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 50% 45%, var(--zip-portal-glow) 0%, transparent 55%),
+    var(--zip-portal-bg);
+  color: var(--zip-portal-text);
+  clip-path: polygon(0 100%, 0 100%, 0 100%);
+  will-change: clip-path;
+}
+
+.road-portal.revealed .zip-portal-content {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.road-portal.revealed .zip-portal-progress {
+  animation: zipProgress 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.road-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.road-asphalt {
+  fill: none;
+  stroke: var(--road-asphalt);
+  stroke-width: 42;
+  stroke-linecap: round;
+}
+
+.road-shoulder {
+  fill: none;
+  stroke: var(--road-edge);
+  stroke-width: 2;
+  opacity: 0.65;
+  stroke-linecap: round;
+}
+
+.road-dash {
+  fill: none;
+  stroke: var(--road-dash);
+  stroke-width: 3;
+  stroke-dasharray: 16 14;
+  stroke-linecap: butt;
+}
+
+.road-edge {
+  fill: none;
+  stroke: var(--road-edge);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+}
+
+.road-shadow {
+  fill: none;
+  stroke: var(--zip-shadow);
+  stroke-width: 16;
+  filter: url(#roadBlur);
+}
+
+.road-bike {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 120px;
+  height: 72px;
+  color: var(--road-bike-color);
+  will-change: transform;
+}
+
+.road-bike svg {
+  display: block;
+}
+
+.bike-exhaust {
+  stroke: var(--accent-cyan);
+  stroke-width: 1.8;
+  opacity: 0.7;
+  animation: bikeExhaust 0.35s ease-in-out infinite alternate;
+}
+
+.bike-exhaust.e2 {
+  animation-delay: 0.1s;
+}
+
+.bike-exhaust.e3 {
+  animation-delay: 0.2s;
+}
+
+@keyframes bikeExhaust {
+  from {
+    opacity: 0.25;
+    transform: translateX(3px);
+  }
+  to {
+    opacity: 0.85;
+    transform: translateX(-4px);
+  }
+}
+
+/* ==========================================================================
+   GIS TELEMETRY RIBBON & BLOG EDITORIAL LAYOUT (SHOPIFY × FELT)
+   ========================================================================== */
+
+html {
+  scroll-behavior: smooth;
+}
+
+.gis-ribbon {
+  position: sticky;
+  top: 70px;
+  z-index: 900;
+  width: 100%;
+  background: var(--topbar-bg);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.gis-ribbon-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 8px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.gis-coords-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.gis-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  box-shadow: 0 0 8px var(--accent-cyan);
+}
+
+.gis-chapters {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.gis-chapters::-webkit-scrollbar {
+  display: none;
+}
+
+.gis-ch-link {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  white-space: nowrap;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.gis-ch-link:hover {
+  color: var(--text-main);
+}
+
+.gis-ch-link.active {
+  color: var(--text-main);
+  background: var(--accent-soft);
+}
+
+.gis-unit-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: var(--btn-try-bg);
+  border: 1px solid var(--btn-try-border);
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.gis-unit-toggle:hover {
+  border-color: var(--btn-try-hover-border);
+}
+
+.gis-unit-toggle .unit-opt.active {
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+
+.gis-progress-track {
+  width: 100%;
+  height: 2px;
+  background: transparent;
+}
+
+.gis-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
+  transition: width 0.08s linear;
+}
+
+/* Blog Container & Typography */
+.blog-container {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 56px 24px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 96px;
+}
+
+.blog-chapter {
+  scroll-margin-top: 128px;
+}
+
+.prose-col {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.74rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-cyan);
+  margin-bottom: 14px;
+}
+
+/* Chapter 01: Hero */
+.hero-header {
+  text-align: center;
+}
+
+.hero-title {
+  font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(2.4rem, 5.2vw, 3.85rem);
+  font-weight: 700;
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+  color: var(--text-main);
+  margin-bottom: 20px;
+}
+
+.hero-lead {
+  font-size: 1.125rem;
+  line-height: 1.68;
+  color: var(--text-muted);
+  margin-bottom: 28px;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 44px;
+}
+
+.blog-btn-primary,
+.blog-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 9999px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.blog-btn-primary {
+  background: var(--text-main);
+  color: var(--bg-color);
+  border: 1px solid var(--text-main);
+}
+
+.blog-btn-primary:hover {
+  transform: translateY(-1px);
+  opacity: 0.92;
+}
+
+.blog-btn-secondary {
+  background: var(--surface-card);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+}
+
+.blog-btn-secondary:hover {
+  border-color: var(--btn-try-hover-border);
+  transform: translateY(-1px);
+}
+
+.breakout-frame {
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  background: var(--surface-card);
+  padding: 10px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+}
+
+.media-zoom-trigger {
+  position: relative;
+  display: block;
+  width: 100%;
+  border: none;
+  padding: 0;
+  background: transparent;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: zoom-in;
+}
+
+.frame-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+
+.zoom-pill {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  background: rgba(7, 9, 14, 0.78);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  opacity: 0.88;
+  transition: opacity 0.2s ease;
+}
+
+.media-zoom-trigger:hover .zoom-pill {
+  opacity: 1;
+}
+
+.frame-caption {
+  padding: 12px 10px 6px;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.problem-shift {
+  margin-top: 52px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.section-subtitle {
+  font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.problem-shift p {
+  font-size: 1.03rem;
+  line-height: 1.75;
+  color: var(--text-muted);
+}
+
+.problem-shift strong {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+/* Section Intros */
+.section-intro {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.section-title {
+  font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(1.75rem, 3.2vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+  margin-bottom: 14px;
+}
+
+.section-desc {
+  font-size: 1.02rem;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+/* Chapter 02: 4-Mindset Interactive Stage */
+.mindset-stage {
+  border-radius: 22px;
+  border: 1px solid var(--border-color);
+  background: var(--surface-card);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  overflow: hidden;
+}
+
+.mindset-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--border-color);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.mindset-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.mindset-tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 14px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.mindset-tab:hover {
+  color: var(--text-main);
+}
+
+.mindset-tab.active {
+  color: var(--text-main);
+  background: var(--accent-soft);
+}
+
+.mindset-tab.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--accent-cyan);
+}
+
+.tab-idx {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.74rem;
+  color: var(--accent-cyan);
+}
+
+.mindset-panel {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 28px;
+  padding: 28px;
+  align-items: center;
+}
+
+.mindset-kicker {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--accent-cyan);
+  margin-bottom: 10px;
+}
+
+.mindset-heading {
+  font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 12px;
+}
+
+.mindset-copy {
+  font-size: 0.97rem;
+  line-height: 1.65;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.telemetry-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.metric-pill {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: var(--surface-elevated);
+}
+
+.metric-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.metric-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.mindset-bullets {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mindset-bullets li {
+  position: relative;
+  padding-left: 16px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.mindset-bullets li::before {
+  content: '›';
+  position: absolute;
+  left: 0;
+  color: var(--accent-cyan);
+  font-weight: 700;
+}
+
+.video-bezel {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  background: #07090e;
+  aspect-ratio: 16 / 10;
+}
+
+.stage-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.video-hud {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  background: rgba(7, 9, 14, 0.78);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: #FFFFFF;
+}
+
+.hud-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00F2FE;
+  box-shadow: 0 0 8px #00F2FE;
+}
+
+.video-play-btn {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 9999px;
+  background: rgba(7, 9, 14, 0.82);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.74rem;
+  cursor: pointer;
+}
+
+.video-play-btn:hover {
+  background: rgba(7, 9, 14, 0.96);
+}
+
+/* Chapter 03: Annotated GIS Interface Bento */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px;
+}
+
+.bento-card {
+  border-radius: 18px;
+  border: 1px solid var(--border-color);
+  background: var(--surface-card);
+  backdrop-filter: blur(12px);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bento-media-wrap {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0b0f17;
+  aspect-ratio: 16 / 10;
+}
+
+.bento-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  cursor: zoom-in;
+}
+
+.hotspot-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  color: #07090e;
+  border: 2px solid #FFFFFF;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 0 0 5px rgba(0, 242, 254, 0.24);
+  transition: transform 0.2s ease;
+  z-index: 4;
+}
+
+.hotspot-pin:hover,
+.hotspot-pin.open {
+  transform: translate(-50%, -50%) scale(1.12);
+}
+
+.hotspot-popover {
+  position: absolute;
+  z-index: 6;
+  max-width: 230px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(11, 15, 24, 0.94);
+  color: #F8FAFC;
+  border: 1px solid rgba(0, 242, 254, 0.35);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.hotspot-popover.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.hotspot-popover strong {
+  display: block;
+  color: #00F2FE;
+  font-size: 0.76rem;
+  margin-bottom: 3px;
+}
+
+.hotspot-popover code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+}
+
+.bento-zoom-btn {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(7, 9, 14, 0.78);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.9rem;
+  cursor: pointer;
+  z-index: 3;
+}
+
+.bento-caption {
+  padding: 2px 6px 4px;
+}
+
+.bento-caption h3 {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.bento-caption p {
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+/* Chapter 04: Open GIS Specs + Quick Start */
+.specs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.spec-card {
+  padding: 22px;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background: var(--surface-card);
+  backdrop-filter: blur(10px);
+}
+
+.spec-num {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent-cyan);
+  padding: 3px 9px;
+  border-radius: 9999px;
+  background: var(--badge-bg);
+  border: 1px solid var(--badge-border);
+  margin-bottom: 12px;
+}
+
+.spec-card h3 {
+  font-size: 1.04rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+
+.spec-card p {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.spec-card code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  color: var(--text-main);
+}
+
+.quickstart-card {
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background: var(--code-bg);
+  color: #E2E8F0;
+  overflow: hidden;
+}
+
+.quickstart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.quickstart-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: #94A3B8;
+}
+
+.copy-code-btn {
+  padding: 5px 12px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #FFFFFF;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.copy-code-btn.copied {
+  border-color: #00F2FE;
+  color: #00F2FE;
+}
+
+.quickstart-code {
+  padding: 18px;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.84rem;
+  line-height: 1.65;
+  color: #E2E8F0;
+}
+
+/* Chapter 05: Closing Banner & GIS Footer */
+.launch-banner {
+  text-align: center;
+  padding: 52px 28px;
+  border-radius: 22px;
+  border: 1px solid var(--border-color);
+  background: var(--surface-card);
+  backdrop-filter: blur(14px);
+}
+
+.launch-title {
+  font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(1.85rem, 3.6vw, 2.6rem);
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 14px;
+}
+
+.launch-sub {
+  max-width: 560px;
+  margin: 0 auto 28px;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+.launch-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.gis-footer {
+  margin-top: 36px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+/* Lightbox Modal */
+.rw-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.rw-lightbox.active {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.rw-lightbox-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 6, 10, 0.86);
+  backdrop-filter: blur(8px);
+}
+
+.rw-lightbox-dialog {
+  position: relative;
+  z-index: 1;
+  max-width: 1020px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rw-lightbox-img {
+  max-width: 100%;
+  max-height: 78vh;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  object-fit: contain;
+}
+
+.rw-lightbox-caption {
+  text-align: center;
+  font-size: 0.88rem;
+  color: #CBD5E1;
+}
+
+.rw-lightbox-close {
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #0F172A;
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+/* Responsive Blog Breakpoints */
+@media (max-width: 900px) {
+  .mindset-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .bento-grid,
+  .specs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .gis-ribbon {
+    top: 64px;
+  }
+
+  .gis-ribbon-inner {
+    padding: 6px 14px;
+    gap: 10px;
+  }
+
+  .gis-coords-wrap {
+    display: none;
+  }
+
+  .blog-container {
+    padding: 36px 16px 64px;
+    gap: 64px;
+  }
+
+  .mindset-tabs {
+    display: flex;
+    overflow-x: auto;
+  }
+
+  .mindset-tab {
+    flex: 0 0 auto;
+    padding: 14px 16px;
+  }
+
+  .mindset-panel {
+    padding: 18px;
+  }
+
+  .hotspot-popover {
+    max-width: 185px;
+  }
 }
 
 

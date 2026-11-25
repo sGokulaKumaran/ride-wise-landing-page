@@ -1,33 +1,37 @@
 /**
- * RIDEWISE LANDING PAGE — CARTOGRAPHIC TOPOGRAPHY + LIVE ROUTE TELEMETRY ENGINE
+ * RIDEWISE LANDING PAGE — ANTIGRAVITY CARTOGRAPHIC PHYSICS ENGINE
  * Zero-dependency HTML5 Canvas 2D engine:
- *  1. Procedural 2D fBm Iso-Contours via Marching Squares (scroll parallax + drift)
- *  2. Coordinate Crosshair Matrix (+ ticks with smooth cursor radar spotlight)
- *  3. Live Vector Route Telemetry (cubic-Bézier margin routes + tapered pulses + waypoint pings)
- *  4. Smooth 300ms RGBA Theme Morph driven by [data-theme="dark" | "light"]
- *  5. Guardrails: DPR <= 2, visibilitychange pause, debounced resize, reduced-motion static frame
+ *  1. Procedural 2D fBm Iso-Contours via Marching Squares + Cursor Gravity-Well & Click Sonar Warp
+ *  2. Antigravity Magnetic Particle Swarm (directional micro-dashes & dots + constellation tethers)
+ *  3. Click Sonar Shockwave (expanding telemetry ring + contour ripple + particle impulse)
+ *  4. Silky Decaying GPS Breadcrumb Cursor Trail (500ms tapered stroke)
+ *  5. Coordinate Crosshair Matrix (+ ticks with smooth cursor radar spotlight)
+ *  6. Live Vector Route Telemetry (cubic-Bézier margin routes + tapered pulses + waypoint pings)
+ *  7. Smooth 300ms RGBA Theme Morph driven by [data-theme="dark" | "light"]
  */
 (() => {
   'use strict';
 
   const PALETTES = {
     dark: {
-      contourMinor: [148, 163, 184, 0.06],
-      contourIndex: [226, 232, 240, 0.11],
-      crosshair: [148, 163, 184, 0.11],
+      contourMinor: [148, 163, 184, 0.065],
+      contourIndex: [226, 232, 240, 0.12],
+      crosshair: [148, 163, 184, 0.115],
       routeLine: [148, 163, 184, 0.08],
-      pulsePrimary: [0, 242, 254, 0.42],
-      pulseSecondary: [59, 130, 246, 0.36],
-      radarTint: [0, 242, 254, 0.07]
+      pulsePrimary: [0, 242, 254, 0.45],
+      pulseSecondary: [59, 130, 246, 0.38],
+      radarTint: [0, 242, 254, 0.08],
+      particleBase: [148, 163, 184, 0.24]
     },
     light: {
-      contourMinor: [15, 23, 42, 0.055],
-      contourIndex: [15, 23, 42, 0.095],
-      crosshair: [15, 23, 42, 0.10],
-      routeLine: [15, 23, 42, 0.07],
-      pulsePrimary: [2, 132, 199, 0.38],
-      pulseSecondary: [37, 99, 235, 0.34],
-      radarTint: [2, 132, 199, 0.055]
+      contourMinor: [15, 23, 42, 0.058],
+      contourIndex: [15, 23, 42, 0.10],
+      crosshair: [15, 23, 42, 0.105],
+      routeLine: [15, 23, 42, 0.072],
+      pulsePrimary: [2, 132, 199, 0.42],
+      pulseSecondary: [37, 99, 235, 0.36],
+      radarTint: [2, 132, 199, 0.06],
+      particleBase: [15, 23, 42, 0.22]
     }
   };
 
@@ -42,8 +46,16 @@
   }
 
   function rgba(arr, alphaOverride) {
-    const a = alphaOverride !== undefined ? alphaOverride : arr[3];
+    const a = Math.max(0, Math.min(1, alphaOverride !== undefined ? alphaOverride : arr[3]));
     return `rgba(${Math.round(arr[0])},${Math.round(arr[1])},${Math.round(arr[2])},${a.toFixed(4)})`;
+  }
+
+  function mixRgba(a, b, t, alphaOverride) {
+    const r = Math.round(a[0] + (b[0] - a[0]) * t);
+    const g = Math.round(a[1] + (b[1] - a[1]) * t);
+    const bl = Math.round(a[2] + (b[2] - a[2]) * t);
+    const al = Math.max(0, Math.min(1, alphaOverride !== undefined ? alphaOverride : a[3] + (b[3] - a[3]) * t));
+    return `rgba(${r},${g},${bl},${al.toFixed(4)})`;
   }
 
   function lerp(a, b, t) {
@@ -95,7 +107,6 @@
     return [x, y];
   }
 
-  // Linear edge interpolation helper for Marching Squares
   function interpEdge(a, b, va, vb, level) {
     const denom = vb - va;
     const t = Math.abs(denom) < 1e-6 ? 0.5 : (level - va) / denom;
@@ -124,7 +135,12 @@
     scrollVel: 0,
     pointer: { x: -9999, y: -9999, targetX: -9999, targetY: -9999, active: false },
 
-    // Routes & pings
+    // Interactive physics state
+    particles: [],
+    sonars: [],
+    trail: [],
+
+    // Routes & waypoint pings
     routes: [],
     pings: [],
 
@@ -166,7 +182,7 @@
       this.bindEvents();
 
       if (this.reducedMotion) {
-        this.renderFrame(0);
+        this.renderFrame();
       } else {
         this.startLoop();
       }
@@ -182,13 +198,39 @@
       }, { passive: true });
 
       window.addEventListener('pointermove', (e) => {
-        if (this.isMobile) return;
-        this.pointer.targetX = e.clientX;
-        this.pointer.targetY = e.clientY;
+        if (this.isMobile || this.reducedMotion) return;
+        const px = e.clientX;
+        const py = e.clientY;
+        this.pointer.targetX = px;
+        this.pointer.targetY = py;
         if (!this.pointer.active) {
-          this.pointer.x = e.clientX;
-          this.pointer.y = e.clientY;
+          this.pointer.x = px;
+          this.pointer.y = py;
           this.pointer.active = true;
+        }
+
+        // Push to decaying GPS breadcrumb trail when moved >= 5px
+        const last = this.trail[this.trail.length - 1];
+        if (!last || Math.hypot(px - last.x, py - last.y) >= 5) {
+          this.trail.push({ x: px, y: py, age: 0 });
+          if (this.trail.length > 22) {
+            this.trail.shift();
+          }
+        }
+      }, { passive: true });
+
+      window.addEventListener('pointerdown', (e) => {
+        if (this.isMobile || this.reducedMotion) return;
+        this.sonars.push({
+          x: e.clientX,
+          y: e.clientY,
+          age: 0,
+          maxAge: 0.9,
+          maxRadius: 320,
+          radius: 1
+        });
+        if (this.sonars.length > 4) {
+          this.sonars.shift();
         }
       }, { passive: true });
 
@@ -200,7 +242,7 @@
         clearTimeout(this.resizeTimer);
         this.resizeTimer = setTimeout(() => {
           this.resize();
-          if (this.reducedMotion) this.renderFrame(0);
+          if (this.reducedMotion) this.renderFrame();
         }, 120);
       }, { passive: true });
 
@@ -217,7 +259,7 @@
         this.reducedMotion = e.matches;
         if (this.reducedMotion) {
           this.stopLoop();
-          this.renderFrame(0);
+          this.renderFrame();
         } else {
           this.lastTime = performance.now();
           this.startLoop();
@@ -244,7 +286,7 @@
       if (this.reducedMotion) {
         this.currentPalette = clonePalette(target);
         this.isMorphing = false;
-        this.renderFrame(0);
+        this.renderFrame();
       }
     },
 
@@ -285,6 +327,36 @@
       this.field = new Float32Array(this.cols * this.rows);
 
       this.buildRoutes();
+      this.buildParticles();
+    },
+
+    buildParticles() {
+      const count = this.isMobile ? 28 : 96;
+      const W = this.width;
+      const H = this.height;
+      this.particles = [];
+
+      for (let i = 0; i < count; i++) {
+        // Golden-ratio quasi-random spread across the viewport
+        const u = hash2D(i * 7 + 3, 19);
+        const v = hash2D(31, i * 11 + 5);
+        const hx = u * W;
+        const hy = v * H;
+
+        this.particles.push({
+          hx,
+          hy,
+          x: hx,
+          y: hy,
+          vx: 0,
+          vy: 0,
+          size: 1.15 + hash2D(i, 97) * 1.15,
+          isDash: hash2D(i, 53) > 0.45,
+          primary: i % 2 === 0,
+          phase: hash2D(i, 71) * Math.PI * 2,
+          energy: 0
+        });
+      }
     },
 
     buildRoutes() {
@@ -294,7 +366,6 @@
       this.pings = [];
 
       if (this.isMobile) {
-        // 3 faint routes on mobile
         const specs = [
           {
             p0: [W * 0.04, -H * 0.05],
@@ -330,12 +401,10 @@
         return;
       }
 
-      // Desktop: 6 routes anchored in the left & right outer margins
       const leftMarginMax = Math.max(W * 0.22, W * 0.5 - 400);
       const rightMarginMin = Math.min(W * 0.78, W * 0.5 + 400);
 
       const specs = [
-        // Left margin routes
         {
           p0: [leftMarginMax * 0.12, -H * 0.06],
           p1: [leftMarginMax * 0.86, H * 0.26],
@@ -363,7 +432,6 @@
           t: 0.42,
           primary: true
         },
-        // Right margin routes
         {
           p0: [rightMarginMin + (W - rightMarginMin) * 0.82, -H * 0.06],
           p1: [rightMarginMin + (W - rightMarginMin) * 0.16, H * 0.30],
@@ -407,7 +475,7 @@
         this.elapsed += dt;
 
         this.updateState(now, dt);
-        this.renderFrame(dt);
+        this.renderFrame();
 
         this.rafId = requestAnimationFrame(tick);
       };
@@ -434,10 +502,33 @@
 
       // Smooth cursor radar
       if (this.pointer.active) {
-        const k = Math.min(1, dt * 10);
+        const k = Math.min(1, dt * 12);
         this.pointer.x += (this.pointer.targetX - this.pointer.x) * k;
         this.pointer.y += (this.pointer.targetY - this.pointer.y) * k;
       }
+
+      // Advance click sonars
+      for (let i = this.sonars.length - 1; i >= 0; i--) {
+        const s = this.sonars[i];
+        s.age += dt;
+        const p = Math.max(0, Math.min(1, s.age / s.maxAge));
+        const easeOut = 1 - Math.pow(1 - p, 3);
+        s.radius = Math.max(1, easeOut * s.maxRadius);
+        if (s.age >= s.maxAge) {
+          this.sonars.splice(i, 1);
+        }
+      }
+
+      // Age & prune decaying GPS cursor trail (500ms)
+      for (let i = this.trail.length - 1; i >= 0; i--) {
+        this.trail[i].age += dt;
+        if (this.trail[i].age >= 0.5) {
+          this.trail.splice(i, 1);
+        }
+      }
+
+      // Update antigravity particle physics
+      this.updateParticles(dt);
 
       // Advance live route pulses
       const speedBoost = 1 + Math.min(this.scrollVel / 550, 2.2);
@@ -447,7 +538,6 @@
         if (r.t < prevT) {
           r.pingFired = false;
         }
-        // Subtle waypoint ping as pulse crosses curve midpoint
         if (!r.pingFired && r.t >= 0.5) {
           r.pingFired = true;
           const [px, py] = evalBezier(r, 0.5);
@@ -470,6 +560,74 @@
       }
     },
 
+    updateParticles(dt) {
+      const springK = 14;
+      const damping = Math.exp(-dt * 5.5);
+      const repulseR = 195;
+      const repulseR2 = repulseR * repulseR;
+      const scrollParallax = -((this.smoothScrollY * 0.14) % this.height);
+      const H = this.height;
+
+      for (const pt of this.particles) {
+        // Gentle floating orbital drift around wrapped home position
+        const targetX = pt.hx + Math.sin(this.elapsed * 0.65 + pt.phase) * 9;
+        let targetY = (pt.hy + scrollParallax + Math.cos(this.elapsed * 0.55 + pt.phase) * 9) % H;
+        if (targetY < 0) targetY += H;
+
+        // Avoid huge spring snap when wrapping vertically across viewport edge
+        if (Math.abs(targetY - pt.y) > H * 0.5) {
+          pt.y = targetY;
+          pt.vy = 0;
+        }
+
+        // Spring pull back toward ambient home
+        pt.vx += (targetX - pt.x) * springK * dt;
+        pt.vy += (targetY - pt.y) * springK * dt;
+
+        let targetEnergy = 0;
+
+        // Magnetic cursor repulsion + subtle orbital swirl (desktop only)
+        if (!this.isMobile && this.pointer.active) {
+          const dx = pt.x - this.pointer.x;
+          const dy = pt.y - this.pointer.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < repulseR2 && d2 > 0.01) {
+            const d = Math.sqrt(d2);
+            const falloff = 1 - d / repulseR;
+            const nx = dx / d;
+            const ny = dy / d;
+            const force = falloff * falloff * 1800 * dt;
+            // Radial push + tangential orbital swirl
+            pt.vx += nx * force - ny * force * 0.42;
+            pt.vy += ny * force + nx * force * 0.42;
+            targetEnergy = Math.max(targetEnergy, falloff);
+          }
+        }
+
+        // Click sonar radial impulse
+        for (const s of this.sonars) {
+          const dx = pt.x - s.x;
+          const dy = pt.y - s.y;
+          const d = Math.hypot(dx, dy);
+          const band = Math.abs(d - s.radius);
+          if (band < 48 && d > 0.01) {
+            const wave = (1 - band / 48) * (1 - s.age / s.maxAge);
+            const push = wave * 950 * dt;
+            pt.vx += (dx / d) * push;
+            pt.vy += (dy / d) * push;
+            targetEnergy = Math.max(targetEnergy, wave);
+          }
+        }
+
+        pt.vx *= damping;
+        pt.vy *= damping;
+        pt.x += pt.vx * dt;
+        pt.y += pt.vy * dt;
+
+        pt.energy += (targetEnergy - pt.energy) * Math.min(1, dt * 8);
+      }
+    },
+
     renderFrame() {
       const ctx = this.ctx;
       const W = this.width;
@@ -482,14 +640,14 @@
       if (!this.isMobile && this.pointer.active) {
         const px = this.pointer.x;
         const py = this.pointer.y;
-        const grad = ctx.createRadialGradient(px, py, 0, px, py, 230);
+        const grad = ctx.createRadialGradient(px, py, 0, px, py, 240);
         grad.addColorStop(0, rgba(pal.radarTint));
         grad.addColorStop(1, rgba(pal.radarTint, 0));
         ctx.fillStyle = grad;
-        ctx.fillRect(px - 230, py - 230, 460, 460);
+        ctx.fillRect(px - 240, py - 240, 480, 480);
       }
 
-      // 2. Procedural Topographic Iso-Contours
+      // 2. Procedural Topographic Iso-Contours (with Cursor & Sonar Elevation Warp)
       this.drawContours(ctx, pal);
 
       // 3. Coordinate Crosshair Matrix
@@ -497,6 +655,14 @@
 
       // 4. Live Vector Route Telemetry
       this.drawRoutes(ctx, pal);
+
+      // 5. Antigravity Particle Swarm & Constellation Tethers
+      this.drawParticles(ctx, pal);
+
+      // 6. Silky GPS Breadcrumb Cursor Trail & Click Sonar Shockwaves
+      if (!this.isMobile) {
+        this.drawTrailAndSonars(ctx, pal);
+      }
     },
 
     drawContours(ctx, pal) {
@@ -510,12 +676,49 @@
       const driftY = this.elapsed * 0.008;
       const scrollOffset = this.smoothScrollY * 0.16 * scale;
 
+      const hasPointer = !this.isMobile && this.pointer.active;
+      const px = this.pointer.x;
+      const py = this.pointer.y;
+      const warpRadius = 240;
+      const warpR2 = warpRadius * warpRadius;
+      const invTwoSigma2 = 1 / (2 * 105 * 105);
+      const hasSonars = !this.isMobile && this.sonars.length > 0;
+
       for (let r = 0; r < rows; r++) {
-        const wy = r * step * scale + scrollOffset + driftY;
+        const sy = r * step;
+        const wy = sy * scale + scrollOffset + driftY;
         const rowOffset = r * cols;
         for (let c = 0; c < cols; c++) {
-          const wx = c * step * scale + driftX;
-          field[rowOffset + c] = fbm2D(wx, wy);
+          const sx = c * step;
+          const wx = sx * scale + driftX;
+          let hVal = fbm2D(wx, wy);
+
+          // Gaussian gravity-well displacement around cursor
+          if (hasPointer) {
+            const dx = sx - px;
+            const dy = sy - py;
+            const d2 = dx * dx + dy * dy;
+            if (d2 < warpR2) {
+              hVal += Math.exp(-d2 * invTwoSigma2) * 0.22;
+            }
+          }
+
+          // Click sonar wave ripple through elevation heightfield
+          if (hasSonars) {
+            for (let si = 0; si < this.sonars.length; si++) {
+              const s = this.sonars[si];
+              const dx = sx - s.x;
+              const dy = sy - s.y;
+              const dist = Math.hypot(dx, dy);
+              const band = dist - s.radius;
+              if (Math.abs(band) < 90) {
+                const decay = 1 - Math.min(1, s.age / s.maxAge);
+                hVal += Math.exp(-(band * band) / 1444) * decay * 0.24;
+              }
+            }
+          }
+
+          field[rowOffset + c] = hVal;
         }
       }
 
@@ -554,8 +757,6 @@
             const x0 = c * step;
             const x1 = x0 + step;
 
-            // Edge intersection points:
-            // top (v0-v1), right (v1-v2), bottom (v3-v2), left (v0-v3)
             const topX = () => interpEdge(x0, x1, v0, v1, level);
             const rightY = () => interpEdge(y0, y1, v1, v2, level);
             const bottomX = () => interpEdge(x0, x1, v3, v2, level);
@@ -628,7 +829,6 @@
       const startX = (W % spacing) * 0.5;
       const arm = 2.6;
 
-      // Batch base crosshairs in one path
       ctx.strokeStyle = rgba(pal.crosshair);
       ctx.lineWidth = 1;
       ctx.beginPath();
@@ -644,7 +844,6 @@
       }
       ctx.stroke();
 
-      // Cursor radar highlight on nearby crosshairs (desktop only)
       if (!this.isMobile && this.pointer.active) {
         const px = this.pointer.x;
         const py = this.pointer.y;
@@ -665,7 +864,7 @@
             const d2 = dx * dx + dy * dy;
             if (d2 < r2) {
               const falloff = 1 - Math.sqrt(d2) / radius;
-              const boostAlpha = pal.crosshair[3] + falloff * 0.11;
+              const boostAlpha = pal.crosshair[3] + falloff * 0.12;
               ctx.strokeStyle = rgba(pal.crosshair, boostAlpha);
               ctx.beginPath();
               ctx.moveTo(x - arm * 1.2, y);
@@ -686,7 +885,7 @@
 
         if (hasClosest) {
           const closeness = 1 - Math.sqrt(closestDist2) / radius;
-          ctx.strokeStyle = rgba(pal.pulsePrimary, 0.12 + closeness * 0.16);
+          ctx.strokeStyle = rgba(pal.pulsePrimary, 0.14 + closeness * 0.18);
           ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.arc(closestX, closestY, 6.5, 0, Math.PI * 2);
@@ -701,7 +900,6 @@
       ctx.save();
       ctx.translate(0, routeScrollShift);
 
-      // Static route hairlines
       ctx.strokeStyle = rgba(pal.routeLine);
       ctx.lineWidth = 1;
       ctx.beginPath();
@@ -711,7 +909,6 @@
       }
       ctx.stroke();
 
-      // Gliding telemetry pulses (tapered 18-segment tail + 2.2px glowing head)
       const tailSegments = 18;
       const tailSpan = 0.095;
 
@@ -740,7 +937,6 @@
           ctx.stroke();
         }
 
-        // Glowing pulse head
         const [hx, hy] = evalBezier(r, headT);
         const halo = ctx.createRadialGradient(hx, hy, 0, hx, hy, 10);
         halo.addColorStop(0, rgba(baseColor, baseColor[3] * 0.85));
@@ -756,7 +952,6 @@
         ctx.fill();
       }
 
-      // Expanding waypoint pings
       for (const p of this.pings) {
         const progress = Math.max(0, Math.min(1, p.age / p.maxAge));
         const easeOut = 1 - Math.pow(1 - progress, 3);
@@ -772,6 +967,110 @@
       }
 
       ctx.restore();
+    },
+
+    drawParticles(ctx, pal) {
+      const pts = this.particles;
+      const n = pts.length;
+
+      // Constellation tethers between energized nodes (desktop only)
+      if (!this.isMobile) {
+        const tetherR = 115;
+        const tetherR2 = tetherR * tetherR;
+        ctx.lineWidth = 0.8;
+
+        for (let i = 0; i < n; i++) {
+          const a = pts[i];
+          if (a.energy < 0.16) continue;
+          for (let j = i + 1; j < n; j++) {
+            const b = pts[j];
+            if (b.energy < 0.16) continue;
+            const dx = a.x - b.x;
+            const dy = a.y - b.y;
+            const d2 = dx * dx + dy * dy;
+            if (d2 < tetherR2) {
+              const linkStrength = (1 - Math.sqrt(d2) / tetherR) * Math.min(a.energy, b.energy);
+              const accent = a.primary ? pal.pulsePrimary : pal.pulseSecondary;
+              ctx.strokeStyle = rgba(accent, linkStrength * 0.42);
+              ctx.beginPath();
+              ctx.moveTo(a.x, a.y);
+              ctx.lineTo(b.x, b.y);
+              ctx.stroke();
+            }
+          }
+        }
+      }
+
+      // Draw each directional dash or crisp dot
+      ctx.lineCap = 'round';
+      for (let i = 0; i < n; i++) {
+        const pt = pts[i];
+        const accent = pt.primary ? pal.pulsePrimary : pal.pulseSecondary;
+        const e = Math.max(0, Math.min(1, pt.energy));
+        const alpha = lerp(pal.particleBase[3], Math.min(0.9, accent[3] * 1.7), e);
+        const color = mixRgba(pal.particleBase, accent, e, alpha);
+
+        const speed = Math.hypot(pt.vx, pt.vy);
+        if (pt.isDash || speed > 28) {
+          const angle = speed > 4 ? Math.atan2(pt.vy, pt.vx) : pt.phase;
+          const halfLen = 2 + Math.min(speed * 0.025, 5.5) + e * 2;
+          const cx = Math.cos(angle) * halfLen;
+          const cy = Math.sin(angle) * halfLen;
+
+          ctx.strokeStyle = color;
+          ctx.lineWidth = pt.size * (0.95 + e * 0.45);
+          ctx.beginPath();
+          ctx.moveTo(pt.x - cx, pt.y - cy);
+          ctx.lineTo(pt.x + cx, pt.y + cy);
+          ctx.stroke();
+        } else {
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, Math.max(0.5, pt.size + e * 0.7), 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    },
+
+    drawTrailAndSonars(ctx, pal) {
+      // Decaying GPS breadcrumb cursor trail (500ms)
+      if (this.trail.length > 1) {
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        for (let i = 1; i < this.trail.length; i++) {
+          const p0 = this.trail[i - 1];
+          const p1 = this.trail[i];
+          const life = Math.max(0, 1 - p1.age / 0.5);
+          const frac = i / this.trail.length;
+          ctx.strokeStyle = rgba(pal.pulsePrimary, life * frac * 0.52);
+          ctx.lineWidth = 0.8 + frac * 1.8;
+          ctx.beginPath();
+          ctx.moveTo(p0.x, p0.y);
+          ctx.lineTo(p1.x, p1.y);
+          ctx.stroke();
+        }
+      }
+
+      // Click sonar shockwaves
+      for (const s of this.sonars) {
+        const progress = Math.max(0, Math.min(1, s.age / s.maxAge));
+        const alpha = (1 - progress) * 0.55;
+        const outerR = Math.max(0.5, s.radius);
+        ctx.strokeStyle = rgba(pal.pulsePrimary, alpha);
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, outerR, 0, Math.PI * 2);
+        ctx.stroke();
+
+        if (outerR > 24) {
+          const innerR = Math.max(0.5, outerR * 0.74);
+          ctx.strokeStyle = rgba(pal.pulseSecondary, alpha * 0.55);
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, innerR, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      }
     }
   };
 

@@ -11,7 +11,7 @@
   <!-- Google Fonts: body text + wordmark -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="landingPage.css" />
 </head>
@@ -105,9 +105,378 @@
     </div>
   </header>
 
+  <!-- Sticky GIS Telemetry Ribbon -->
+  <nav class="gis-ribbon" id="gisRibbon" aria-label="Chapter navigation and telemetry">
+    <div class="gis-ribbon-inner">
+      <div class="gis-coords-wrap">
+        <span class="gis-live-dot" aria-hidden="true"></span>
+        <span class="gis-coords" id="gisCoords">LAT 12.9716° N · LON 77.5946° E</span>
+      </div>
+
+      <div class="gis-chapters" role="list">
+        <a href="#ch-story" class="gis-ch-link active" data-ch="ch-story">01 Story</a>
+        <a href="#ch-mindsets" class="gis-ch-link" data-ch="ch-mindsets">02 Mindsets</a>
+        <a href="#ch-interface" class="gis-ch-link" data-ch="ch-interface">03 Interface</a>
+        <a href="#ch-architecture" class="gis-ch-link" data-ch="ch-architecture">04 Specs</a>
+        <a href="#ch-launch" class="gis-ch-link" data-ch="ch-launch">05 Launch</a>
+      </div>
+
+      <button class="gis-unit-toggle" id="gisUnitToggle" type="button" aria-label="Toggle distance units between kilometers and miles">
+        <span class="unit-opt active" data-unit="km">km</span>
+        <span class="unit-sep" aria-hidden="true">/</span>
+        <span class="unit-opt" data-unit="mi">mi</span>
+      </button>
+    </div>
+    <div class="gis-progress-track" aria-hidden="true">
+      <div class="gis-progress-bar" id="gisProgressBar"></div>
+    </div>
+  </nav>
+
   <main class="main-content">
-    <!-- Next sections will go here -->
+    <article class="blog-container">
+
+      <!-- ================================================================
+           CHAPTER 01: HERO & PROBLEM SHIFT
+           ================================================================ -->
+      <section id="ch-story" class="blog-chapter ch-hero" data-coords="LAT 12.9716° N · LON 77.5946° E">
+        <div class="prose-col hero-header">
+          <p class="eyebrow">OPEN-SOURCE GIS · NAVIGATION &amp; FLEET TELEMETRY</p>
+          <h1 class="hero-title">Every journey, connected.</h1>
+          <p class="hero-lead">
+            One open-source spatial platform that lets you ride solo with voice turn-by-turn, sync live convoys with friends, track campus buses stop-by-stop, or dispatch an entire city fleet — with zero paid map API keys.
+          </p>
+          <div class="hero-actions">
+            <a href="https://ride-wise.pages.dev" target="_blank" rel="noopener noreferrer" class="blog-btn-primary js-zip-launch">
+              <span>Try RideWise Live</span>
+              <span aria-hidden="true">→</span>
+            </a>
+            <a href="#ch-mindsets" class="blog-btn-secondary">
+              <span>Explore the 4 Mindsets</span>
+              <span aria-hidden="true">↓</span>
+            </a>
+          </div>
+        </div>
+
+        <figure class="breakout-frame hero-media-frame">
+          <button type="button" class="media-zoom-trigger" data-lightbox-src="assets/hero-promo.png" data-lightbox-caption="RideWise live navigation, group convoy sync, and multi-vehicle fleet dispatch running on open geospatial infrastructure." aria-label="Zoom hero platform overview">
+            <img src="assets/hero-promo.png" alt="RideWise platform overview showing live fleet map, solo navigation, and group sync" class="frame-img" />
+            <span class="zoom-pill">Click to inspect ↗</span>
+          </button>
+          <figcaption class="frame-caption">
+            <strong>Field Overview</strong> — Solo navigation, live group convoys, and real-time fleet telemetry unified behind a single account.
+          </figcaption>
+        </figure>
+
+        <div class="prose-col problem-shift">
+          <h2 class="section-subtitle">Why road software feels broken into silos</h2>
+          <p>
+            Most GPS apps solve only one slice of the road. Consumer navigation apps guide a single phone from A to B, but go blind the moment three friends want to stay in sync or a college needs to show 400 students where Bus #7 actually is. On the other side, commercial fleet tools lock schools, travel operators, and local transit behind sales calls, hardware dongles, and steep per-vehicle subscriptions.
+          </p>
+          <p>
+            RideWise collapses that wall with <strong>per-organization RBAC</strong> over an open geospatial stack. The same account you use for your morning commute can lead a weekend group ride at noon, drive a campus shuttle in the afternoon, and inspect live vehicle telemetry across an entire city by evening.
+          </p>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           CHAPTER 02: INTERACTIVE 4-MINDSET STAGE (SHOPIFY × FELT)
+           ================================================================ -->
+      <section id="ch-mindsets" class="blog-chapter ch-mindsets" data-coords="LAT 13.0827° N · LON 80.2707° E">
+        <div class="prose-col section-intro">
+          <p class="eyebrow">02 · BUILT FOR EVERY MINDSET</p>
+          <h2 class="section-title">One engine, four distinct road experiences.</h2>
+          <p class="section-desc">
+            Switch between perspectives below to watch real RideWise recordings and live telemetry parameters adapt to each rider, passenger, and operator.
+          </p>
+        </div>
+
+        <div class="mindset-stage">
+          <div class="mindset-tabs" role="tablist" aria-label="RideWise user mindsets">
+            <button class="mindset-tab active" role="tab" aria-selected="true" data-mindset="solo">
+              <span class="tab-idx">01</span>
+              <span class="tab-label">Solo Riders</span>
+            </button>
+            <button class="mindset-tab" role="tab" aria-selected="false" data-mindset="group">
+              <span class="tab-idx">02</span>
+              <span class="tab-label">Group Rides</span>
+            </button>
+            <button class="mindset-tab" role="tab" aria-selected="false" data-mindset="campus">
+              <span class="tab-idx">03</span>
+              <span class="tab-label">Passengers &amp; Campus</span>
+            </button>
+            <button class="mindset-tab" role="tab" aria-selected="false" data-mindset="fleet">
+              <span class="tab-idx">04</span>
+              <span class="tab-label">Fleet Admins</span>
+            </button>
+          </div>
+
+          <div class="mindset-panel" id="mindsetPanel">
+            <div class="mindset-info">
+              <span class="mindset-kicker" id="mindsetKicker">TURN-BY-TURN · VOICE GUIDANCE</span>
+              <h3 class="mindset-heading" id="mindsetTitle">Solo Riders</h3>
+              <p class="mindset-copy" id="mindsetCopy">
+                Plan routes with live alternatives, spoken maneuver prompts, and segment-projected off-route recovery across 6 open map styles — with Screen Wake Lock and zero API lock-in.
+              </p>
+
+              <div class="telemetry-metrics">
+                <div class="metric-pill">
+                  <span class="metric-label">ACTIVE ROUTE</span>
+                  <strong class="metric-val" id="metricDist" data-km="14.2">14.2 km</strong>
+                </div>
+                <div class="metric-pill">
+                  <span class="metric-label">AVG PACE</span>
+                  <strong class="metric-val" id="metricSpeed" data-kmh="46">46 km/h</strong>
+                </div>
+              </div>
+
+              <ul class="mindset-bullets" id="mindsetBullets">
+                <li>6 map styles: Auto, Standard, Dark, Satellite, Terrain, Cycling</li>
+                <li>Accuracy-scaled off-route hysteresis prevents noisy reroutes</li>
+                <li>4 adaptive UI themes + persistent ride history</li>
+              </ul>
+            </div>
+
+            <div class="mindset-media">
+              <div class="video-bezel">
+                <video id="mindsetVideo" class="stage-video" muted loop playsinline preload="metadata" poster="assets/shot-solo.png">
+                  <source src="assets/clip-solo.mp4" type="video/mp4" />
+                </video>
+                <div class="video-hud" id="mindsetHud">
+                  <span class="hud-dot" aria-hidden="true"></span>
+                  <span id="mindsetHudText">NAV ENGINE · ACTIVE</span>
+                </div>
+                <button type="button" class="video-play-btn" id="mindsetPlayToggle" aria-label="Pause video">
+                  <span id="playBtnIcon">❚❚</span>
+                  <span id="playBtnLabel">Pause</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           CHAPTER 03: ANNOTATED GIS INTERFACE ANATOMY (2×2 BENTO)
+           ================================================================ -->
+      <section id="ch-interface" class="blog-chapter ch-interface" data-coords="LAT 11.0168° N · LON 76.9558° E">
+        <div class="prose-col section-intro">
+          <p class="eyebrow">03 · INTERFACE ANATOMY</p>
+          <h2 class="section-title">Inspect every live layer inside the app.</h2>
+          <p class="section-desc">
+            Tap any numbered spatial pin on the real RideWise screens below to inspect how navigation math, WebSockets, and transit UX work together — or click any image to zoom full-screen.
+          </p>
+        </div>
+
+        <div class="bento-grid">
+          <!-- Card 1: Solo Navigation -->
+          <figure class="bento-card">
+            <div class="bento-media-wrap">
+              <img src="assets/shot-solo.png" alt="RideWise Solo turn-by-turn navigation UI" class="bento-img js-lightbox-img" data-lightbox-src="assets/shot-solo.png" data-lightbox-caption="Solo turn-by-turn navigation: live maneuver card, speed, remaining distance, ETA, and voice toggle." />
+
+              <button type="button" class="hotspot-pin" style="top: 16%; left: 32%;" aria-expanded="false" aria-label="Inspect maneuver card">
+                <span>1</span>
+              </button>
+              <div class="hotspot-popover" style="top: 23%; left: 10%;">
+                <strong>Next-Maneuver Banner</strong>
+                <p>Spoken Web Speech cues trigger dynamically by current speed and approach distance.</p>
+              </div>
+
+              <button type="button" class="hotspot-pin" style="top: 76%; left: 66%;" aria-expanded="false" aria-label="Inspect telemetry HUD">
+                <span>2</span>
+              </button>
+              <div class="hotspot-popover" style="top: 46%; left: 38%;">
+                <strong>Segment-Projected Telemetry</strong>
+                <p>Live speed, remaining <span data-km="8.4">8.4 km</span>, and ETA computed purely in <code>navigation.js</code>.</p>
+              </div>
+
+              <button type="button" class="bento-zoom-btn" data-lightbox-src="assets/shot-solo.png" data-lightbox-caption="Solo turn-by-turn navigation: live maneuver card, speed, remaining distance, ETA, and voice toggle." aria-label="Zoom Solo Navigation screenshot">⤢</button>
+            </div>
+            <figcaption class="bento-caption">
+              <h3>Solo Turn-by-Turn Navigation</h3>
+              <p>Distraction-free maneuver card, live speed telemetry, and Screen Wake Lock.</p>
+            </figcaption>
+          </figure>
+
+          <!-- Card 2: Group Off-Route Rejoin -->
+          <figure class="bento-card">
+            <div class="bento-media-wrap">
+              <img src="assets/shot-group-rejoin.png" alt="RideWise group ride purple off-route rejoin path" class="bento-img js-lightbox-img" data-lightbox-src="assets/shot-group-rejoin.png" data-lightbox-caption="Group ride purple rejoin: an off-route rider receives a dedicated purple rejoin path ahead on the shared route." />
+
+              <button type="button" class="hotspot-pin" style="top: 48%; left: 54%;" aria-expanded="false" aria-label="Inspect purple rejoin path">
+                <span>1</span>
+              </button>
+              <div class="hotspot-popover" style="top: 18%; left: 26%;">
+                <strong>Purple Rejoin Vector</strong>
+                <p>Instead of forcing awkward U-turns, RideWise computes an intercept path ahead on the convoy route.</p>
+              </div>
+
+              <button type="button" class="hotspot-pin" style="top: 22%; left: 72%;" aria-expanded="false" aria-label="Inspect live rider status">
+                <span>2</span>
+              </button>
+              <div class="hotspot-popover" style="top: 30%; left: 38%;">
+                <strong>/ws/rides Live Sync</strong>
+                <p>Opt-in rider coordinates stream in real time with instant <em>Off route</em> alerts for the group.</p>
+              </div>
+
+              <button type="button" class="bento-zoom-btn" data-lightbox-src="assets/shot-group-rejoin.png" data-lightbox-caption="Group ride purple rejoin: an off-route rider receives a dedicated purple rejoin path ahead on the shared route." aria-label="Zoom Group Ride screenshot">⤢</button>
+            </div>
+            <figcaption class="bento-caption">
+              <h3>Group Convoy &amp; Purple Rejoin</h3>
+              <p>Keep riders together with live breadcrumbs and smart forward intercept routing.</p>
+            </figcaption>
+          </figure>
+
+          <!-- Card 3: Passenger Stop-by-Stop -->
+          <figure class="bento-card">
+            <div class="bento-media-wrap">
+              <img src="assets/shot-passenger.jpg" alt="RideWise passenger live bus stops and ETA drawer" class="bento-img js-lightbox-img" data-lightbox-src="assets/shot-passenger.jpg" data-lightbox-caption="Passenger stop-by-stop ETA drawer with passed stops, crowd badges, and proximity alerts." />
+
+              <button type="button" class="hotspot-pin" style="top: 34%; left: 28%;" aria-expanded="false" aria-label="Inspect stop timeline">
+                <span>1</span>
+              </button>
+              <div class="hotspot-popover" style="top: 42%; left: 8%;">
+                <strong>Stop-by-Stop ETA Drawer</strong>
+                <p>Passed stops dim automatically while upcoming stops update live from vehicle GPS.</p>
+              </div>
+
+              <button type="button" class="hotspot-pin" style="top: 64%; left: 68%;" aria-expanded="false" aria-label="Inspect crowd badge and proximity alert">
+                <span>2</span>
+              </button>
+              <div class="hotspot-popover" style="top: 32%; left: 32%;">
+                <strong>Crowd Badges &amp; Proximity Ping</strong>
+                <p>See <em>Seats free</em> / <em>Filling up</em> / <em>Full</em> and set a <em>"Tell me when it's near"</em> alert.</p>
+              </div>
+
+              <button type="button" class="bento-zoom-btn" data-lightbox-src="assets/shot-passenger.jpg" data-lightbox-caption="Passenger stop-by-stop ETA drawer with passed stops, crowd badges, and proximity alerts." aria-label="Zoom Passenger Stops screenshot">⤢</button>
+            </div>
+            <figcaption class="bento-caption">
+              <h3>Passenger Stop Timeline &amp; Alerts</h3>
+              <p>No more guessing at the bus stop — unlock public or private orgs with a code.</p>
+            </figcaption>
+          </figure>
+
+          <!-- Card 4: Fleet Dispatch Map -->
+          <figure class="bento-card">
+            <div class="bento-media-wrap">
+              <img src="assets/shot-fleet-college.png" alt="RideWise live multi-vehicle fleet map" class="bento-img js-lightbox-img" data-lightbox-src="assets/shot-fleet-college.png" data-lightbox-caption="College & city fleet live dispatch map showing active buses, routes, and real-time telemetry." />
+
+              <button type="button" class="hotspot-pin" style="top: 42%; left: 48%;" aria-expanded="false" aria-label="Inspect live fleet markers">
+                <span>1</span>
+              </button>
+              <div class="hotspot-popover" style="top: 12%; left: 22%;">
+                <strong>In-Memory Fleet Broadcaster</strong>
+                <p>Live positions fan out over <code>/ws/fleet</code> with 5s throttled PostgreSQL persistence.</p>
+              </div>
+
+              <button type="button" class="hotspot-pin" style="top: 72%; left: 24%;" aria-expanded="false" aria-label="Inspect admin operations suite">
+                <span>2</span>
+              </button>
+              <div class="hotspot-popover" style="top: 40%; left: 10%;">
+                <strong>9-Tab Admin Operations Suite</strong>
+                <p>Manage vehicles, routes, drivers, trip GPS replays, CSV exports, and announcements.</p>
+              </div>
+
+              <button type="button" class="bento-zoom-btn" data-lightbox-src="assets/shot-fleet-college.png" data-lightbox-caption="College & city fleet live dispatch map showing active buses, routes, and real-time telemetry." aria-label="Zoom Fleet Dispatch screenshot">⤢</button>
+            </div>
+            <figcaption class="bento-caption">
+              <h3>Multi-Vehicle Fleet Operations</h3>
+              <p>Atomic driver/vehicle locking, trip GPS replay, SOS alerts, and live analytics.</p>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           CHAPTER 04: UNDER THE HOOD — OPEN GIS SPECS & QUICK START
+           ================================================================ -->
+      <section id="ch-architecture" class="blog-chapter ch-architecture" data-coords="LAT 17.3850° N · LON 78.4867° E">
+        <div class="prose-col section-intro">
+          <p class="eyebrow">04 · UNDER THE HOOD</p>
+          <h2 class="section-title">Open geospatial architecture, engineered for builders.</h2>
+          <p class="section-desc">
+            Zero proprietary map SDKs. RideWise pairs a React 19 + Leaflet client with a Java 21 / Spring Boot 3.4 WebSocket backend and database-enforced invariants.
+          </p>
+        </div>
+
+        <div class="specs-grid">
+          <div class="spec-card">
+            <span class="spec-num">01</span>
+            <h3>Browser-Direct Open Stack</h3>
+            <p>OSM, Stadia, Esri, OpenTopoMap &amp; CyclOSM tiles plus Photon/Nominatim search and OSRM routing run straight from the browser — <strong>0 bytes</strong> proxied through the backend.</p>
+          </div>
+          <div class="spec-card">
+            <span class="spec-num">02</span>
+            <h3>Pure <code>navigation.js</code> Engine</h3>
+            <p>Zero React or Leaflet dependencies. Handles route segment projection, maneuver announcements, off-route hysteresis, and passenger ETA estimation cleanly.</p>
+          </div>
+          <div class="spec-card">
+            <span class="spec-num">03</span>
+            <h3>Throttled WebSocket Telemetry</h3>
+            <p><code>/ws/rides</code> and <code>/ws/fleet</code> broadcast from memory with 25s heartbeat pings while PostgreSQL persists thinned tracks (max 4,000 pts/trip) every 5s.</p>
+          </div>
+          <div class="spec-card">
+            <span class="spec-num">04</span>
+            <h3>Server-Enforced RBAC &amp; Locks</h3>
+            <p><code>OrgGuard</code> validates every organization call, and nullable unique keys (<code>active_vehicle_key</code>, <code>active_driver_key</code>) prevent double-booking at the DB layer.</p>
+          </div>
+        </div>
+
+        <div class="quickstart-card">
+          <div class="quickstart-head">
+            <span class="quickstart-label">SELF-HOST IN 60 SECONDS · H2 TEST MODE (NO POSTGRES REQUIRED)</span>
+            <button type="button" class="copy-code-btn" id="btnCopyQuickstart">Copy commands</button>
+          </div>
+          <pre class="quickstart-code" id="quickstartCode"><code># Terminal 1 — Spring Boot 3.4 API + WebSockets on :8080
+cd backend/ridewise &amp;&amp; ./mvnw spring-boot:test-run
+
+# Terminal 2 — React 19 + Vite 8 frontend on :5173
+cd frontend &amp;&amp; npm run dev</code></pre>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           CHAPTER 05: CLOSING CONVERSION BANNER & GIS FOOTER
+           ================================================================ -->
+      <section id="ch-launch" class="blog-chapter ch-launch" data-coords="LAT 28.6139° N · LON 77.2090° E">
+        <div class="launch-banner">
+          <p class="eyebrow">05 · READY TO ROLL</p>
+          <h2 class="launch-title">One account. Zero paid map API keys.</h2>
+          <p class="launch-sub">
+            Test solo navigation in your browser, invite friends to a live convoy, or launch a campus/fleet organization in minutes.
+          </p>
+          <div class="launch-actions">
+            <a href="https://ride-wise.pages.dev" target="_blank" rel="noopener noreferrer" class="blog-btn-primary js-road-launch">
+              <span>Try RideWise Free</span>
+              <span aria-hidden="true">→</span>
+            </a>
+            <a href="https://github.com/sGokulaKumaran/Ride-Wise" target="_blank" rel="noopener noreferrer" class="blog-btn-secondary">
+              <span>GitHub Repo</span>
+            </a>
+            <a href="https://res.cloudinary.com/ubhnc15t/video/upload/v1793038952/Ridewise_short_ad_1.mp4" target="_blank" rel="noopener noreferrer" class="blog-btn-secondary">
+              <span>Watch Full Demo</span>
+            </a>
+          </div>
+        </div>
+
+        <footer class="gis-footer">
+          <span>CRS: EPSG:4326 · WGS 84</span>
+          <span>LICENSE: GNU AGPL-3.0</span>
+          <span>STACK: LEAFLET · OSRM · PHOTON · SPRING BOOT 3.4</span>
+        </footer>
+      </section>
+
+    </article>
   </main>
+
+  <!-- Image Zoom Lightbox -->
+  <div class="rw-lightbox" id="rwLightbox" aria-hidden="true" role="dialog" aria-label="Screenshot preview">
+    <div class="rw-lightbox-backdrop" id="rwLightboxBackdrop"></div>
+    <figure class="rw-lightbox-dialog">
+      <button type="button" class="rw-lightbox-close" id="rwLightboxClose" aria-label="Close preview">✕</button>
+      <img src="" alt="" id="rwLightboxImg" class="rw-lightbox-img" />
+      <figcaption id="rwLightboxCaption" class="rw-lightbox-caption"></figcaption>
+    </figure>
+  </div>
 
   <!-- ==========================================================================
        ZIPPER LAUNCH TRANSITION OVERLAY
@@ -164,7 +533,104 @@
       </svg>
     </div>
   </div>
+
+  <!-- ==========================================================================
+       DIAGONAL ROAD + BIKE LAUNCH TRANSITION OVERLAY
+       ========================================================================== -->
+  <div id="roadOverlay" class="road-overlay" aria-hidden="true">
+    <div class="road-portal" id="roadPortal">
+      <div class="zip-portal-content">
+        <div class="zip-portal-brand">
+          <img src="ridewise-icon-192.png" alt="RideWise" class="zip-portal-logo" />
+          <span class="zip-portal-name">RIDEWISE</span>
+        </div>
+        <p class="zip-portal-tagline">Launching Navigation Platform...</p>
+        <div class="zip-portal-track">
+          <div class="zip-portal-progress"></div>
+        </div>
+      </div>
+    </div>
+
+    <svg class="road-svg" id="roadSvg">
+      <defs>
+        <filter id="roadBlur" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="7"></feGaussianBlur>
+        </filter>
+      </defs>
+      <polyline id="roadShadowTop" class="road-shadow"></polyline>
+      <polyline id="roadShadowBottom" class="road-shadow"></polyline>
+      <polyline id="roadEdgeTop" class="road-edge"></polyline>
+      <polyline id="roadEdgeBottom" class="road-edge"></polyline>
+      <line id="roadAheadAsphalt" class="road-asphalt"></line>
+      <line id="roadAheadShoulderA" class="road-shoulder"></line>
+      <line id="roadAheadShoulderB" class="road-shoulder"></line>
+      <line id="roadAheadDash" class="road-dash"></line>
+    </svg>
+
+    <div class="road-bike" id="roadBike">
+      <svg width="120" height="72" viewBox="0 0 120 72" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+        <defs>
+          <linearGradient id="bikeBeamGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="var(--accent-cyan)" stop-opacity="0.42"></stop>
+            <stop offset="100%" stop-color="var(--accent-cyan)" stop-opacity="0"></stop>
+          </linearGradient>
+        </defs>
+
+        <!-- Exhaust / wind speed streaks trailing behind -->
+        <line x1="2" y1="50" x2="16" y2="50" class="bike-exhaust e1"></line>
+        <line x1="0" y1="57" x2="13" y2="57" class="bike-exhaust e2"></line>
+        <line x1="6" y1="63" x2="18" y2="63" class="bike-exhaust e3"></line>
+
+        <!-- Headlight volumetric beam -->
+        <polygon points="94,35 120,23 120,49" fill="url(#bikeBeamGrad)" stroke="none"></polygon>
+
+        <!-- Rear Wheel (bottom at y=68) -->
+        <g id="bikeWheelRear" transform="translate(30 56)">
+          <circle cx="0" cy="0" r="12" stroke-width="3.2"></circle>
+          <circle cx="0" cy="0" r="8" stroke-width="1.2" opacity="0.65"></circle>
+          <circle cx="0" cy="0" r="3" fill="currentColor" stroke="none"></circle>
+          <line x1="-8" y1="0" x2="8" y2="0" stroke-width="1.4"></line>
+          <line x1="0" y1="-8" x2="0" y2="8" stroke-width="1.4"></line>
+          <line x1="-5.6" y1="-5.6" x2="5.6" y2="5.6" stroke-width="1.2"></line>
+          <line x1="-5.6" y1="5.6" x2="5.6" y2="-5.6" stroke-width="1.2"></line>
+        </g>
+
+        <!-- Front Wheel (bottom at y=68) -->
+        <g id="bikeWheelFront" transform="translate(88 56)">
+          <circle cx="0" cy="0" r="12" stroke-width="3.2"></circle>
+          <circle cx="0" cy="0" r="8" stroke-width="1.2" opacity="0.65"></circle>
+          <circle cx="0" cy="0" r="3" fill="currentColor" stroke="none"></circle>
+          <line x1="-8" y1="0" x2="8" y2="0" stroke-width="1.4"></line>
+          <line x1="0" y1="-8" x2="0" y2="8" stroke-width="1.4"></line>
+          <line x1="-5.6" y1="-5.6" x2="5.6" y2="5.6" stroke-width="1.2"></line>
+          <line x1="-5.6" y1="5.6" x2="5.6" y2="-5.6" stroke-width="1.2"></line>
+        </g>
+
+        <!-- Exhaust pipe & swingarm -->
+        <path d="M20 53 L42 52 L48 47" stroke-width="2.4"></path>
+        <path d="M30 56 L47 47 L68 47" stroke-width="2.2"></path>
+
+        <!-- Bike sculpted frame, tank, fairing & windshield -->
+        <path d="M24 39 L44 39 L56 32 L76 32 L85 38 L88 56" fill="var(--bg-color)" fill-opacity="0.72" stroke-width="2.2"></path>
+        <path d="M52 33 Q64 26 77 32" stroke-width="2.4"></path>
+        <path d="M74 31 L84 25" stroke-width="2"></path>
+        <!-- Front fork -->
+        <line x1="76" y1="33" x2="88" y2="56" stroke-width="2.5"></line>
+        <!-- Taillight & LED headlight -->
+        <circle cx="24" cy="39" r="2.2" fill="#EF4444" stroke="none"></circle>
+        <circle cx="91" cy="36" r="2.6" fill="var(--accent-cyan)" stroke="none"></circle>
+
+        <!-- Helmeted Rider leaning forward -->
+        <path d="M46 39 L49 27 L63 22 L76 29" stroke-width="2.5"></path>
+        <path d="M51 39 L55 48 L48 53" stroke-width="2.2"></path>
+        <circle cx="66" cy="17" r="5.5" fill="currentColor" stroke="none"></circle>
+        <path d="M67 15.5 L72 16.5 L70.5 19 L66.5 18.5 Z" fill="var(--accent-cyan)" stroke="none"></path>
+      </svg>
+    </div>
+  </div>
+
   <script src="landingPage.js"></script>
   <script src="landingBackground.js"></script>
+  <script src="landingBlog.js"></script>
 </body>
 </html> 
