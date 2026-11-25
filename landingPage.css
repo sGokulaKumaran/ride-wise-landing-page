@@ -43,6 +43,11 @@
   --zip-tyre-color: #FFFFFF;
   --zip-track-fill: rgba(255, 255, 255, 0.12);
   --zip-progress-fill: #FFFFFF;
+
+  /* Cartographic Background */
+  --bg-grain-opacity: 0.018;
+  --bg-corridor-rgb: 7, 9, 14;
+  --bg-corridor-core: 0.86;
 }
 
 /* 2. LIGHT THEME — day ride */
@@ -85,6 +90,11 @@
   --zip-tyre-color: #000000;
   --zip-track-fill: rgba(15, 23, 42, 0.1);
   --zip-progress-fill: #0F172A;
+
+  /* Cartographic Background */
+  --bg-grain-opacity: 0.014;
+  --bg-corridor-rgb: 248, 250, 252;
+  --bg-corridor-core: 0.88;
 }
 
 /* Base Reset */
@@ -105,6 +115,70 @@ body {
 
 .text-muted {
   color: var(--text-muted);
+}
+
+.main-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* ==========================================================================
+   CARTOGRAPHIC TELEMETRY BACKGROUND
+   ========================================================================== */
+
+.rw-bg-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.rw-bg-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Soft central reading corridor so long-form blog prose stays effortless to read */
+.rw-bg-corridor {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(var(--bg-corridor-rgb), 0) 0%,
+    rgba(var(--bg-corridor-rgb), calc(var(--bg-corridor-core) * 0.52)) max(12%, calc(50% - 460px)),
+    rgba(var(--bg-corridor-rgb), var(--bg-corridor-core)) max(22%, calc(50% - 360px)),
+    rgba(var(--bg-corridor-rgb), var(--bg-corridor-core)) min(78%, calc(50% + 360px)),
+    rgba(var(--bg-corridor-rgb), calc(var(--bg-corridor-core) * 0.52)) min(88%, calc(50% + 460px)),
+    rgba(var(--bg-corridor-rgb), 0) 100%
+  );
+  transition: background 0.3s ease;
+}
+
+/* Subtle matte anti-banding micro-grain */
+.rw-bg-grain {
+  position: absolute;
+  inset: 0;
+  opacity: var(--bg-grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 180px 180px;
+  transition: opacity 0.3s ease;
+}
+
+@media (max-width: 640px) {
+  .rw-bg-corridor {
+    background: linear-gradient(
+      to right,
+      rgba(var(--bg-corridor-rgb), calc(var(--bg-corridor-core) * 0.35)) 0%,
+      rgba(var(--bg-corridor-rgb), calc(var(--bg-corridor-core) * 0.68)) 20%,
+      rgba(var(--bg-corridor-rgb), calc(var(--bg-corridor-core) * 0.68)) 80%,
+      rgba(var(--bg-corridor-rgb), calc(var(--bg-corridor-core) * 0.35)) 100%
+    );
+  }
 }
 
 /* ==========================================================================

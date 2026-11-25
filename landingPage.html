@@ -17,6 +17,13 @@
 </head>
 <body>
 
+  <!-- Cartographic Topography + Live Route Telemetry Background -->
+  <div class="rw-bg-stage" aria-hidden="true">
+    <canvas id="rwBgCanvas" class="rw-bg-canvas"></canvas>
+    <div class="rw-bg-corridor"></div>
+    <div class="rw-bg-grain"></div>
+  </div>
+
   <!-- Top Bar -->
   <header class="topbar" id="topbar">
 
@@ -31,7 +38,7 @@
             <span class="speed-line line-2"></span>
           </span>
           <!-- Wheel / Tyre SVG -->
-          <svg class="btn-tyre" id="btnTyreIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg class="btn-tyre" id="btnTyreIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"  aria-hidden="true">
             <!-- Outer tyre rim -->
             <circle cx="12" cy="12" r="10"></circle>
             <!-- Center hub -->
@@ -158,5 +165,6 @@
     </div>
   </div>
   <script src="landingPage.js"></script>
+  <script src="landingBackground.js"></script>
 </body>
 </html> 
